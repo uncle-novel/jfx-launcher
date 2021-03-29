@@ -1,0 +1,3 @@
+rootProject.name = 'fx-launcher'
+includeBuild 'build-sass'
+

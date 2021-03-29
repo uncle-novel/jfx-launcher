@@ -1,0 +1,43 @@
+plugins {
+  id 'java'
+  id 'sass'
+  id "org.openjfx.javafxplugin" version "0.0.9"
+}
+
+allprojects {
+  group = 'com.unclezs.jfx'
+  version = property("app.version")
+  description = "openJfx launcher"
+  apply from: "${rootDir}/gradle/publish-maven.gradle"
+}
+
+repositories {
+  mavenCentral()
+}
+
+tasks.withType(JavaCompile) {
+  options.encoding = "UTF-8"
+  options.fork = true
+  sourceCompatibility = JavaVersion.VERSION_11
+  targetCompatibility = JavaVersion.VERSION_11
+  options.compilerArgs += ['-Xdoclint:none', '-Xlint:none', '-nowarn']
+}
+
+dependencies {
+  annotationProcessor "org.projectlombok:lombok:1.18.18"
+  compileOnly "org.projectlombok:lombok:1.18.18"
+  compileOnly "com.google.code.gson:gson:2.8.6"
+}
+
+test {
+  useJUnitPlatform()
+}
+
+javafx {
+  version = "16"
+  modules = ["javafx.base", "javafx.controls", "javafx.fxml", "javafx.graphics", "javafx.media", "javafx.swing", "javafx.web"]
+}
+
+jar {
+  exclude "**/scss/**"
+}
