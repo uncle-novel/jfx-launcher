@@ -1,38 +1,36 @@
 ---
-name: Bug report
-about: Create a report to help us improve
+name: 提交BUG
+about: 提交BUG及问题
 title: ''
-labels: ''
+labels: 'bug'
 assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+<!--
+  感谢您花时间创建一个issue，请参照一下模板进行问题描述：
+-->
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+**问题简述**
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+阐述 记录/问题/事件/... 发生的背景
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+**复现步骤**
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+如何操作才能够复现
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+**自我分析**
 
-**Additional context**
-Add any other context about the problem here.
+先给出自己的态度以及尝试
+
+**截图与日志**
+
+错误的截图和日志
+
+**操作环境**
+
+系统配置及版本信息等
+
+**其他补充**
+
+其他内容补充
