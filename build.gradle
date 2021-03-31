@@ -1,18 +1,24 @@
+buildscript {
+  dependencies {
+    classpath 'com.unclezs:sass-gradle-plugin:1.0.4'
+  }
+}
 plugins {
   id 'java'
-  id 'sass'
   id "org.openjfx.javafxplugin" version "0.0.9"
 }
+apply plugin: "com.unclezs.gradle.sass"
 
 allprojects {
   group = 'com.unclezs.jfx'
   version = property("app.version")
-  description = "openJfx launcher"
-  apply from: "${rootDir}/gradle/publish-maven.gradle"
-}
+  description = "openjfx launcher"
+  apply from: "${rootDir}/gradle/publications.gradle"
 
-repositories {
-  mavenCentral()
+  repositories {
+    mavenLocal()
+    mavenCentral()
+  }
 }
 
 tasks.withType(JavaCompile) {
@@ -26,7 +32,7 @@ tasks.withType(JavaCompile) {
 dependencies {
   annotationProcessor "org.projectlombok:lombok:1.18.18"
   compileOnly "org.projectlombok:lombok:1.18.18"
-  compileOnly "com.google.code.gson:gson:2.8.6"
+  implementation "com.google.code.gson:gson:2.8.6"
 }
 
 test {
@@ -36,6 +42,7 @@ test {
 javafx {
   version = "16"
   modules = ["javafx.base", "javafx.controls", "javafx.fxml", "javafx.graphics", "javafx.media", "javafx.swing", "javafx.web"]
+  configuration = "compileOnly"
 }
 
 jar {
