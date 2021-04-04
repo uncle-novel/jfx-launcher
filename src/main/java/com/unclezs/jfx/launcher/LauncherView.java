@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.logging.Logger;
+
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.css.PseudoClass;
@@ -28,8 +29,7 @@ public class LauncherView extends StackPane {
   /**
    * 设置是否为更新的伪类
    */
-  private static final PseudoClass UPDATING_PSEUDO_CLASS_STATE = PseudoClass
-      .getPseudoClass("updating");
+  private static final PseudoClass UPDATING_PSEUDO_CLASS_STATE = PseudoClass.getPseudoClass("updating");
   private final Label phase = new Label();
   private final StackPane messageView = new StackPane();
   private final StackPane progressView = new StackPane();
@@ -37,8 +37,10 @@ public class LauncherView extends StackPane {
   private Label whatNew;
   private Label logo;
   private ReadOnlyBooleanWrapper updating;
+  private final Manifest manifest;
 
-  public LauncherView() {
+  public LauncherView(Manifest manifest) {
+    this.manifest = manifest;
     getStyleClass().setAll(DEFAULT_CLASS);
     getStylesheets().setAll(LauncherView.class.getResource("/css/view.css").toExternalForm());
 
@@ -79,7 +81,7 @@ public class LauncherView extends StackPane {
    * 初始化启动器组件
    */
   public void initLauncherView() {
-    logo = new Label("Uncle小说");
+    logo = new Label(manifest.getAppName());
     logo.getStyleClass().setAll("logo");
     messageView.getChildren().setAll(logo);
     progressView.getChildren().setAll(phase);

@@ -13,9 +13,12 @@ import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+
 import lombok.experimental.UtilityClass;
 
 /**
+ * 日志工具
+ *
  * @author blog.unclezs.com
  * @date 2021/03/27 0:24
  */

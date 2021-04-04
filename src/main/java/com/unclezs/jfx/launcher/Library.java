@@ -3,11 +3,14 @@ package com.unclezs.jfx.launcher;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
+ * 依赖文件
+ *
  * @author blog.unclezs.com
  * @since 2021/03/23 13:46
  */
@@ -18,7 +21,7 @@ public class Library {
 
   private String path;
   private Long size;
-  private Os os;
+  private Platform platform;
 
   public URL toUrl(Path libDir) {
     try {
@@ -30,6 +33,6 @@ public class Library {
 
 
   public boolean currentPlatform() {
-    return os == null || os == Os.CURRENT;
+    return platform == null || platform == Platform.CURRENT;
   }
 }

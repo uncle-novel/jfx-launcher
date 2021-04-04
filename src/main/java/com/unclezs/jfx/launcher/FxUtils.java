@@ -1,10 +1,13 @@
 package com.unclezs.jfx.launcher;
 
 import java.util.concurrent.CountDownLatch;
+
 import javafx.application.Platform;
 import lombok.experimental.UtilityClass;
 
 /**
+ * Fx工具
+ *
  * @author blog.unclezs.com
  * @date 2021/03/26 23:22
  */

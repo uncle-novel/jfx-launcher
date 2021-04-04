@@ -26,7 +26,7 @@ publishing {
       }
     }
     maven {
-      name = "local"
+      name = "build"
       def releasesRepoUrl = "${buildDir}/repo/release"
       def snapshotsRepoUrl = "${buildDir}/repo/snapshot"
       url = snapshot ? snapshotsRepoUrl : releasesRepoUrl
@@ -84,7 +84,7 @@ java {
 }
 
 javadoc {
-  options.addStringOption("charset", "UTF-8")
+  options.encoding = 'UTF-8'
   options.addStringOption("tag", "date")
 }
 

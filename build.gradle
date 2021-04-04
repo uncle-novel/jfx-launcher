@@ -9,6 +9,11 @@ plugins {
 }
 apply plugin: "com.unclezs.gradle.sass"
 
+
+sourceSets {
+  main.output.resourcesDir = main.java.outputDir
+}
+
 allprojects {
   group = 'com.unclezs.jfx'
   version = property("app.version")
@@ -27,22 +32,35 @@ tasks.withType(JavaCompile) {
   sourceCompatibility = JavaVersion.VERSION_11
   targetCompatibility = JavaVersion.VERSION_11
   options.compilerArgs += ['-Xdoclint:none', '-Xlint:none', '-nowarn']
+
+  // 模块化编译参数
+  File vmArgs = file("$projectDir/launcher.modularity");
+  if (vmArgs.exists()) {
+    vmArgs.readLines().each {
+      if (!it.isBlank() && !it.startsWith("//")) {
+        options.compilerArgs.add(it)
+      }
+    }
+  }
 }
 
 dependencies {
   annotationProcessor "org.projectlombok:lombok:1.18.18"
   compileOnly "org.projectlombok:lombok:1.18.18"
   implementation "com.google.code.gson:gson:2.8.6"
+  // test
+  testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.0"
+  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
 }
 
 test {
   useJUnitPlatform()
+  include(["**/*Tests.class", "**/*Test.class"])
 }
 
 javafx {
-  version = "16"
-  modules = ["javafx.base", "javafx.controls", "javafx.fxml", "javafx.graphics", "javafx.media", "javafx.swing", "javafx.web"]
-  configuration = "compileOnly"
+  version = "11"
+  modules = ["javafx.base", "javafx.controls", "javafx.fxml"]
 }
 
 jar {

@@ -41,7 +41,7 @@ public class Manifest {
   /**
    * 应用 Logo
    */
-  protected String appName = "Uncle小说";
+  protected String appName = "FX-Launcher";
   /**
    * 服务器地址
    */
@@ -53,7 +53,7 @@ public class Manifest {
   /**
    * 依赖文件夹
    */
-  protected String libDir;
+  protected String libDir = "lib";
   /**
    * 版本
    */
@@ -76,7 +76,7 @@ public class Manifest {
   private boolean newVersion = true;
 
   /**
-   * 加载配合
+   * 加载配置
    *
    * @param uri 配置文件URI
    * @return 配置
@@ -96,7 +96,10 @@ public class Manifest {
    * @throws Exception /
    */
   public static Manifest embedded() throws Exception {
-    URL resource = LauncherApp.class.getResource(BACKSLASH.concat(Manifest.EMBEDDED_CONFIG_NAME));
+    URL resource = Launcher.class.getResource(BACKSLASH.concat(Manifest.EMBEDDED_CONFIG_NAME));
+    if (resource == null) {
+      return new Manifest();
+    }
     return load(resource.toURI());
   }
 
@@ -149,5 +152,23 @@ public class Manifest {
       return URI.create(serverUri.concat(configName));
     }
     return URI.create(configServerUri);
+  }
+
+  /**
+   * 输出为JSON
+   *
+   * @return JSON字符串
+   */
+  public String toJson() {
+    return GSON.toJson(this);
+  }
+
+  /**
+   * 校验配置是否有效
+   *
+   * @return true 有效
+   */
+  public boolean validate() {
+    return launcherClass != null && !launcherClass.isBlank();
   }
 }
