@@ -35,7 +35,6 @@ public class LauncherView extends StackPane {
   private final StackPane progressView = new StackPane();
   private ProgressBar progressBar;
   private Label whatNew;
-  private Label logo;
   private ReadOnlyBooleanWrapper updating;
   private final Manifest manifest;
 
@@ -81,7 +80,7 @@ public class LauncherView extends StackPane {
    * 初始化启动器组件
    */
   public void initLauncherView() {
-    logo = new Label(manifest.getAppName());
+    Label logo = new Label(manifest.getAppName());
     logo.getStyleClass().setAll("logo");
     messageView.getChildren().setAll(logo);
     progressView.getChildren().setAll(phase);
@@ -112,15 +111,6 @@ public class LauncherView extends StackPane {
       whatNew.setText(updateMsg.toString());
       whatNewView.setContent(whatNew);
     });
-  }
-
-  /**
-   * 设置logo名字
-   *
-   * @param logoName Logo名字
-   */
-  public void setLogoName(String logoName) {
-    FxUtils.runFx(() -> logo.setText(logoName));
   }
 
   /**

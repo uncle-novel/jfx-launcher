@@ -109,31 +109,36 @@ public class Launcher extends Application {
    * 同步manifest
    */
   public void syncManifest() {
-    // 嵌入Jar包中的
-    Manifest remoteManifest;
     try {
-      LOG.info(String.format("获取远程配置文件，%s", manifest.remoteManifest()));
-      ui.setPhase("正在检测是否有新版本...");
-      remoteManifest = Manifest.load(manifest.remoteManifest());
-    } catch (Exception e) {
-      LOG.warning(String.format("同步配置文件失败，%s \n %s", manifest.remoteManifest(), e.getMessage()));
-      throw new RuntimeException(e);
+      // 嵌入Jar包中的
+      Manifest remoteManifest;
+      try {
+        LOG.info(String.format("获取远程配置文件，%s", manifest.remoteManifest()));
+        ui.setPhase("正在检测是否有新版本...");
+        remoteManifest = Manifest.load(manifest.remoteManifest());
+      } catch (Exception e) {
+        LOG.warning(String.format("同步配置文件失败，%s \n %s", manifest.remoteManifest(), e.getMessage()));
+        throw new RuntimeException(e);
+      }
+      if (!checkNew(remoteManifest)) {
+        ui.setPhase(String.format("当前已是最新版本：%s", manifest.getVersion()));
+        this.newVersion = false;
+        return;
+      }
+      // 开始做更新
+      ui.initUpdateView();
+      ui.setPhase(String.format("检测到新版本：%s", manifest.getVersion()));
+      manifest = remoteManifest;
+      // 显示更新内容
+      if (!manifest.getChangeLog().isEmpty()) {
+        LOG.info(String.format("更新内容：%s", manifest.getChangeLog()));
+        ui.setWhatNew(manifest.getChangeLog());
+      }
+      syncLibraries();
+    } catch (Throwable t) {
+      // 忽略更新失败
+      LoggerHelper.error(LOG, "更新失败", t);
     }
-    if (!checkNew(remoteManifest)) {
-      ui.setPhase(String.format("当前已是最新版本：%s", manifest.getVersion()));
-      this.newVersion = false;
-      return;
-    }
-    // 开始做更新
-    ui.initUpdateView();
-    ui.setPhase(String.format("检测到新版本：%s", manifest.getVersion()));
-    manifest = remoteManifest;
-    // 显示更新内容
-    if (!manifest.getChangeLog().isEmpty()) {
-      LOG.info(String.format("更新内容：%s", manifest.getChangeLog()));
-      ui.setWhatNew(manifest.getChangeLog());
-    }
-    syncLibraries();
   }
 
   /**
@@ -189,7 +194,6 @@ public class Launcher extends Application {
           LOG.info(String.format("下载完成: %s", library.getPath()));
         }
         ui.setProgress(++i / libraries.size());
-        Thread.sleep(50);
       }
     } catch (Exception e) {
       LOG.warning(String.format("更新最新版本失败: %s", e.getMessage()));
