@@ -175,11 +175,6 @@ public class Launcher extends Application {
    */
   private void syncLibraries() {
     try {
-      // 不存在则创建
-      Path libDir = Path.of(manifest.getLibDir());
-      if (Files.notExists(libDir)) {
-        Files.createDirectories(Path.of(manifest.getLibDir()));
-      }
       ui.setPhase("正在同步最新版本配置...");
       Files.write(manifest.localManifest(), manifest.remoteManifest().toURL().openStream().readAllBytes());
       ui.setPhase("正在下载最新版本...");
@@ -187,11 +182,16 @@ public class Launcher extends Application {
       ui.setProgress(0);
       double i = 0;
       for (Library library : libraries) {
-        Path localPath = Paths.get(manifest.getLibDir(), library.getPath());
+        Path localPath = Path.of(library.getPath());
         if (!Files.exists(localPath) || Files.size(localPath) != library.getSize()) {
-          URL url = library.toUrl(Path.of(URI.create(manifest.getServerUri())));
+          // 创建父目录
+          if (!Files.exists(localPath.getParent())) {
+            Files.createDirectories(localPath.getParent());
+          }
+          // 下载更新
+          URL url = library.toUrl(Path.of(URI.create(manifest.getUrl())));
           Files.write(localPath, url.openStream().readAllBytes());
-          LOG.info(String.format("下载完成: %s", library.getPath()));
+          LOG.info(String.format("更新完成: %s", library.getPath()));
         }
         ui.setProgress(++i / libraries.size());
       }
@@ -213,7 +213,7 @@ public class Launcher extends Application {
         return true;
       }
       for (Library library : remote.resolveRemoteLibraries()) {
-        Path localPath = Paths.get(remote.getLibDir(), library.getPath());
+        Path localPath = Path.of(library.getPath());
         if (!Files.exists(localPath) || Files.size(localPath) != library.getSize()) {
           return true;
         }

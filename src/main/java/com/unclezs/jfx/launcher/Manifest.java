@@ -13,7 +13,6 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,12 +31,12 @@ public class Manifest {
   /**
    * 嵌入Jar的配置文件名
    */
-  public static final String EMBEDDED_CONFIG_NAME = "app.json";
+  public static final String EMBEDDED_CONFIG = "app.json";
   public static final String BACKSLASH = "/";
   /**
-   * 配置文件名
+   * 配置文件位置
    */
-  protected String configName = EMBEDDED_CONFIG_NAME;
+  protected String configPath = EMBEDDED_CONFIG;
   /**
    * 应用 Logo
    */
@@ -45,15 +44,11 @@ public class Manifest {
   /**
    * 服务器地址
    */
-  protected String serverUri;
+  protected String url;
   /**
    * 服务端配置的URI
    */
-  protected String configServerUri;
-  /**
-   * 依赖文件夹
-   */
-  protected String libDir = "lib";
+  protected String configUrl;
   /**
    * 版本
    */
@@ -73,7 +68,7 @@ public class Manifest {
   /**
    * 是否为新版本
    */
-  private boolean newVersion = true;
+  private transient boolean newVersion = true;
 
   /**
    * 加载配置
@@ -96,7 +91,7 @@ public class Manifest {
    * @throws Exception /
    */
   public static Manifest embedded() throws Exception {
-    URL resource = Launcher.class.getResource(BACKSLASH.concat(Manifest.EMBEDDED_CONFIG_NAME));
+    URL resource = Launcher.class.getResource(BACKSLASH.concat(Manifest.EMBEDDED_CONFIG));
     if (resource == null) {
       return new Manifest();
     }
@@ -106,13 +101,13 @@ public class Manifest {
   /**
    * 设置 服务器地址 保证 /结尾
    *
-   * @param serverUri 文件服务器地址
+   * @param url 文件服务器地址
    */
-  public void setServerUri(String serverUri) {
-    if (!serverUri.endsWith(BACKSLASH)) {
-      serverUri = serverUri.concat(BACKSLASH);
+  public void setUrl(String url) {
+    if (!url.endsWith(BACKSLASH)) {
+      url = url.concat(BACKSLASH);
     }
-    this.serverUri = serverUri;
+    this.url = url;
   }
 
   /**
@@ -121,7 +116,7 @@ public class Manifest {
    * @return 依赖URL列表
    */
   public List<URL> resolveLibraries() {
-    return libs.stream().filter(Library::currentPlatform).map(library -> library.toUrl(Path.of(libDir))).collect(Collectors.toList());
+    return libs.stream().filter(Library::currentPlatform).map(library -> library.toUrl(Path.of("."))).collect(Collectors.toList());
   }
 
   /**
@@ -139,7 +134,7 @@ public class Manifest {
    * @return 配置
    */
   public Path localManifest() {
-    return Paths.get(libDir, configName);
+    return Path.of(configPath);
   }
 
   /**
@@ -148,10 +143,10 @@ public class Manifest {
    * @return 配置
    */
   public URI remoteManifest() {
-    if (configServerUri == null || configServerUri.isBlank()) {
-      return URI.create(serverUri.concat(configName));
+    if (configUrl == null || configUrl.isBlank()) {
+      return URI.create(url.concat(configPath));
     }
-    return URI.create(configServerUri);
+    return URI.create(configUrl);
   }
 
   /**
