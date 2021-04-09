@@ -58,3 +58,9 @@
 - **resources**: 资源列表，升级时候可以自动更新的，可以指定JAR、NATIVE、NATIVE_SYS、FILE类型的，根据不同类型采取不同的加载策略
 
 
+### 注意
+
+如果添加了打破模块的规则，并且源模块不属于当前加载的layer，需要添加VM参数允许反射
+```
+--add-modules ALL-SYSTEM --add-opens=java.base/java.lang=com.unclezs.jfx.launcher
+```

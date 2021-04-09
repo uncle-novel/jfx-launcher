@@ -102,9 +102,8 @@ public class LauncherView extends StackPane {
    */
   public void setWhatNew(List<String> news) {
     StringBuilder updateMsg = new StringBuilder();
-    int i = 1;
     for (String msg : news) {
-      updateMsg.append(i++).append(msg).append("\n");
+      updateMsg.append(msg).append("\n");
     }
     FxUtils.runFx(() -> {
       ScrollPane whatNewView = new ScrollPane();

@@ -1,5 +1,7 @@
 apply plugin: "maven-publish"
 apply plugin: "signing"
+apply plugin: "io.codearte.nexus-staging"
+
 
 def githubUrl = "https://github.com/unclezs/${project.name}"
 def snapshot = project.version.endsWith('SNAPSHOT')
@@ -76,6 +78,11 @@ publishing.publications.withType(MavenPublication) {
       url = "${githubUrl}/issues"
     }
   }
+}
+
+nexusStaging {
+  username = findProperty("sonatype.name")
+  password = findProperty("sonatype.password")
 }
 
 java {
