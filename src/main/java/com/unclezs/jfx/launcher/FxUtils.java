@@ -1,9 +1,9 @@
 package com.unclezs.jfx.launcher;
 
-import java.util.concurrent.CountDownLatch;
-
 import javafx.application.Platform;
 import lombok.experimental.UtilityClass;
+
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Fx工具

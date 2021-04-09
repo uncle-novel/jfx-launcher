@@ -1,68 +1,65 @@
 buildscript {
-  dependencies {
-    classpath 'com.unclezs:sass-gradle-plugin:1.0.4'
-  }
+    repositories {
+        mavenLocal()
+    }
+    dependencies {
+        classpath 'com.unclezs:sass-gradle-plugin:1.0.7'
+    }
 }
 plugins {
-  id 'java'
-  id "org.openjfx.javafxplugin" version "0.0.9"
+    id 'java'
+    id "org.openjfx.javafxplugin" version "0.0.9"
 }
 apply plugin: "com.unclezs.gradle.sass"
 
+sass {
+    cssPath = "com/unclezs/jfx/launcher/css"
+    sassPath = "scss"
+}
 
 sourceSets {
-  main.output.resourcesDir = main.java.outputDir
+    main.output.resourcesDir = main.java.outputDir
 }
 
 allprojects {
-  group = 'com.unclezs.jfx'
-  version = property("app.version")
-  description = "openjfx launcher"
-  apply from: "${rootDir}/gradle/publications.gradle"
+    group = 'com.unclezs.jfx'
+    version = property("app.version")
+    description = "openjfx launcher"
+    apply from: "${rootDir}/gradle/publications.gradle"
 
-  repositories {
-    mavenLocal()
-    mavenCentral()
-  }
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
 }
 
 tasks.withType(JavaCompile) {
-  options.encoding = "UTF-8"
-  options.fork = true
-  sourceCompatibility = JavaVersion.VERSION_11
-  targetCompatibility = JavaVersion.VERSION_11
-  options.compilerArgs += ['-Xdoclint:none', '-Xlint:none', '-nowarn']
-
-  // 模块化编译参数
-  File vmArgs = file("$projectDir/launcher.modularity");
-  if (vmArgs.exists()) {
-    vmArgs.readLines().each {
-      if (!it.isBlank() && !it.startsWith("//")) {
-        options.compilerArgs.add(it)
-      }
-    }
-  }
+    options.encoding = "UTF-8"
+    options.fork = true
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+    options.compilerArgs += ['-Xdoclint:none', '-Xlint:none', '-nowarn']
 }
 
 dependencies {
-  annotationProcessor "org.projectlombok:lombok:1.18.18"
-  compileOnly "org.projectlombok:lombok:1.18.18"
-  implementation "com.google.code.gson:gson:2.8.6"
-  // test
-  testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.0"
-  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+    annotationProcessor "org.projectlombok:lombok:1.18.18"
+    compileOnly "org.projectlombok:lombok:1.18.18"
+    implementation "com.google.code.gson:gson:2.8.6"
+    // test
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.0"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
 }
 
 test {
-  useJUnitPlatform()
-  include(["**/*Tests.class", "**/*Test.class"])
+    useJUnitPlatform()
+    include(["**/*Tests.class", "**/*Test.class"])
 }
 
 javafx {
-  version = "11"
-  modules = ["javafx.base", "javafx.controls", "javafx.fxml"]
+    version = "11"
+    modules = ["javafx.base", "javafx.controls", "javafx.fxml"]
 }
 
 jar {
-  exclude "**/scss/**"
+    exclude "**/scss/**"
 }

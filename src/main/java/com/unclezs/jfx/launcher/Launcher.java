@@ -16,13 +16,11 @@ import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -40,7 +38,6 @@ public class Launcher extends Application {
   private boolean newVersion = true;
 
   public static void main(String[] args) {
-    LOG.info(String.format("当前系统编码格式：file.encoding = %s ; default-charset = %s", System.getProperty("file.encoding"), Charset.defaultCharset()));
     LOG.info("Start FX Launcher...");
     launch(args);
   }
@@ -59,11 +56,11 @@ public class Launcher extends Application {
    * @throws Exception 启动失败
    */
   public void startApplication() throws Exception {
-    ignoreSslCertificate();
-    syncManifest();
+    // 检测升级
+    checkForUpgrade();
     ui.setPhase("正在初始化运行环境...");
-    ClassLoader classLoader = loadLibraries();
-    Class<?> appClass = classLoader.loadClass(manifest.getLauncherClass());
+    ClassLoader loader = loadLibraries();
+    Class<?> appClass = loader.loadClass(manifest.getLaunchClass());
     if (!Application.class.isAssignableFrom(appClass)) {
       handleStartError(new IllegalArgumentException("启动类必须为Application的子类..."));
       return;
@@ -106,39 +103,53 @@ public class Launcher extends Application {
   }
 
   /**
-   * 同步manifest
+   * 检测更新
+   *
+   * @throws Exception 异常
    */
-  public void syncManifest() {
+  private void checkForUpgrade() throws Exception {
+    ignoreSslCertificate();
+    boolean hasNew = syncManifest();
+    if (hasNew) {
+      syncResources();
+    }
+  }
+
+  /**
+   * 同步manifest
+   *
+   * @return true 有更新
+   */
+  public boolean syncManifest() {
     try {
-      // 嵌入Jar包中的
-      Manifest remoteManifest;
-      try {
-        LOG.info(String.format("获取远程配置文件，%s", manifest.remoteManifest()));
-        ui.setPhase("正在检测是否有新版本...");
-        remoteManifest = Manifest.load(manifest.remoteManifest());
-      } catch (Exception e) {
-        LOG.warning(String.format("同步配置文件失败，%s \n %s", manifest.remoteManifest(), e.getMessage()));
-        throw new RuntimeException(e);
-      }
+      LOG.info(String.format("获取远程配置文件，%s", manifest.remoteManifest()));
+      ui.setPhase("正在检测是否有新版本...");
+      Manifest remoteManifest = Manifest.load(manifest.remoteManifest());
       if (!checkNew(remoteManifest)) {
         ui.setPhase(String.format("当前已是最新版本：%s", manifest.getVersion()));
         this.newVersion = false;
-        return;
+        return false;
       }
-      // 开始做更新
+      // 显示更新内容
       ui.initUpdateView();
       ui.setPhase(String.format("检测到新版本：%s", manifest.getVersion()));
+      Path localManifest = manifest.localManifest();
+      if (Files.notExists(localManifest)) {
+        Files.createDirectories(localManifest.getParent());
+      }
+      Files.writeString(manifest.localManifest(), remoteManifest.toJson());
       manifest = remoteManifest;
       // 显示更新内容
       if (!manifest.getChangeLog().isEmpty()) {
         LOG.info(String.format("更新内容：%s", manifest.getChangeLog()));
         ui.setWhatNew(manifest.getChangeLog());
       }
-      syncLibraries();
-    } catch (Throwable t) {
+      return true;
+    } catch (Throwable e) {
       // 忽略更新失败
-      LoggerHelper.error(LOG, "更新失败", t);
+      LoggerHelper.error(LOG, "更新失败", e);
     }
+    return false;
   }
 
   /**
@@ -149,8 +160,9 @@ public class Launcher extends Application {
   private void loadLocalManifest() throws Exception {
     LOG.info("解析本地配置文件");
     manifest = Manifest.embedded();
+    // 解析参数覆盖嵌入的
+    parseParams();
     Path localManifestPath = manifest.localManifest();
-    // libDir下的
     if (Files.exists(localManifestPath)) {
       manifest = Manifest.load(localManifestPath.toUri());
     }
@@ -160,40 +172,55 @@ public class Launcher extends Application {
    * 自定义Classloader加载依赖
    */
   private ClassLoader loadLibraries() {
-    // 加载依赖
-    List<URL> libs = manifest.resolveLibraries();
-    URLClassLoader classLoader = new URLClassLoader(libs.toArray(new URL[0]));
-    // 配置Classloader
-    Thread.currentThread().setContextClassLoader(classLoader);
+    List<Resource> resources = manifest.resolveResources();
+    // 本地库
+    resources.stream()
+      .filter(resource -> Resource.Type.NATIVE == resource.getType())
+      .map(resource -> Path.of(".", resource.getPath()).toFile().getAbsolutePath())
+      .forEach(System::load);
+    // 系统库
+    resources.stream()
+      .filter(resource -> Resource.Type.NATIVE_SYS == resource.getType())
+      .map(Resource::getPath)
+      .forEach(System::loadLibrary);
+    // 加载依赖模块
+    Path[] modules = resources.stream()
+      .filter(resource -> Resource.Type.JAR == resource.getType())
+      .map(Resource::toLocalPath)
+      .toArray(Path[]::new);
+    ModuleLoader moduleLoader = new ModuleLoader(modules, manifest.getLaunchModule());
+    manifest.getModuleOptions().forEach(moduleLoader::add);
+    ClassLoader classLoader = moduleLoader.getClassLoader();
+    // 配置classloader
     FXMLLoader.setDefaultClassLoader(classLoader);
     FxUtils.runAndWait(() -> Thread.currentThread().setContextClassLoader(classLoader));
+    Thread.currentThread().setContextClassLoader(classLoader);
     return classLoader;
   }
 
   /**
    * 从远端同步文件到本地
    */
-  private void syncLibraries() {
+  private void syncResources() {
     try {
-      ui.setPhase("正在同步最新版本配置...");
-      Files.write(manifest.localManifest(), manifest.remoteManifest().toURL().openStream().readAllBytes());
       ui.setPhase("正在下载最新版本...");
-      List<Library> libraries = manifest.resolveRemoteLibraries();
+      List<Resource> resources = manifest.resolveResources();
       ui.setProgress(0);
       double i = 0;
-      for (Library library : libraries) {
-        Path localPath = Path.of(library.getPath());
-        if (!Files.exists(localPath) || Files.size(localPath) != library.getSize()) {
+      for (Resource resource : resources) {
+        Path localPath = resource.toLocalPath();
+        if (Files.notExists(localPath) || Files.size(localPath) != resource.getSize()) {
           // 创建父目录
           if (!Files.exists(localPath.getParent())) {
             Files.createDirectories(localPath.getParent());
           }
           // 下载更新
-          URL url = library.toUrl(Path.of(URI.create(manifest.getUrl())));
+          URL url = resource.toUrl(Path.of(URI.create(manifest.getUrl())));
           Files.write(localPath, url.openStream().readAllBytes());
-          LOG.info(String.format("更新完成: %s", library.getPath()));
+          LOG.info(String.format("更新完成: %s", resource.getPath()));
         }
-        ui.setProgress(++i / libraries.size());
+        ui.setProgress(++i / resources.size());
+        Thread.sleep(100);
       }
     } catch (Exception e) {
       LOG.warning(String.format("更新最新版本失败: %s", e.getMessage()));
@@ -212,9 +239,9 @@ public class Launcher extends Application {
       if (!manifest.equals(remote)) {
         return true;
       }
-      for (Library library : remote.resolveRemoteLibraries()) {
-        Path localPath = Path.of(library.getPath());
-        if (!Files.exists(localPath) || Files.size(localPath) != library.getSize()) {
+      for (Resource resource : remote.resolveResources()) {
+        Path localPath = resource.toLocalPath();
+        if (Files.notExists(localPath) || Files.size(localPath) != resource.getSize()) {
           return true;
         }
       }
@@ -254,6 +281,23 @@ public class Launcher extends Application {
   }
 
   /**
+   * 初始化启动参数
+   */
+  private void parseParams() {
+    Map<String, String> params = getParameters().getNamed();
+    if (manifest == null) {
+      manifest = new Manifest();
+    }
+    manifest.setAppName(params.getOrDefault("name", manifest.getAppName()));
+    manifest.setUrl(params.getOrDefault("url", manifest.getUrl()));
+    manifest.setConfigUrl(params.getOrDefault("configUrl", manifest.getConfigUrl()));
+    manifest.setLaunchClass(params.getOrDefault("launchClass", manifest.getLaunchClass()));
+    manifest.setLaunchModule(params.getOrDefault("launchModule", manifest.getLaunchModule()));
+    manifest.setConfigPath(params.getOrDefault("configPath", manifest.getConfigPath()));
+    manifest.setVersion(params.getOrDefault("version", manifest.getVersion()));
+  }
+
+  /**
    * 启动失败
    *
    * @param e 启动错误
@@ -265,4 +309,5 @@ public class Launcher extends Application {
       launcherStage.close();
     });
   }
+
 }

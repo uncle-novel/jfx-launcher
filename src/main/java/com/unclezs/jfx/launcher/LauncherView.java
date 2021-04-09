@@ -1,10 +1,5 @@
 package com.unclezs.jfx.launcher;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
-import java.util.List;
-import java.util.logging.Logger;
-
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.css.PseudoClass;
@@ -15,6 +10,11 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * 启动UI界面
@@ -33,15 +33,15 @@ public class LauncherView extends StackPane {
   private final Label phase = new Label();
   private final StackPane messageView = new StackPane();
   private final StackPane progressView = new StackPane();
+  private final Manifest manifest;
   private ProgressBar progressBar;
   private Label whatNew;
   private ReadOnlyBooleanWrapper updating;
-  private final Manifest manifest;
 
   public LauncherView(Manifest manifest) {
     this.manifest = manifest;
     getStyleClass().setAll(DEFAULT_CLASS);
-    getStylesheets().setAll(LauncherView.class.getResource("/css/view.css").toExternalForm());
+    getStylesheets().setAll(LauncherView.class.getResource("/com/unclezs/jfx/launcher/css/view.css").toExternalForm());
 
     VBox container = new VBox();
     VBox.setVgrow(messageView, Priority.ALWAYS);

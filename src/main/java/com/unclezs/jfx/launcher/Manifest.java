@@ -58,13 +58,21 @@ public class Manifest {
    */
   protected List<String> changeLog = new ArrayList<>();
   /**
-   * 依赖
+   * 资源
    */
-  protected List<Library> libs = new ArrayList<>();
+  protected List<Resource> resources = new ArrayList<>();
   /**
    * 启动类
    */
-  protected String launcherClass;
+  protected String launchClass;
+  /**
+   * 启动模块
+   */
+  protected String launchModule;
+  /**
+   * 运行时导出/开放/读取的模块
+   */
+  protected List<String> moduleOptions = new ArrayList<>();
   /**
    * 是否为新版本
    */
@@ -111,22 +119,14 @@ public class Manifest {
   }
 
   /**
-   * 解析依赖的URL
+   * 解析当前平台的资源
    *
-   * @return 依赖URL列表
+   * @return 当前资源列表
    */
-  public List<URL> resolveLibraries() {
-    return libs.stream().filter(Library::currentPlatform).map(library -> library.toUrl(Path.of("."))).collect(Collectors.toList());
+  public List<Resource> resolveResources() {
+    return resources.stream().filter(Resource::currentPlatform).collect(Collectors.toList());
   }
 
-  /**
-   * 解析远程依赖的URL
-   *
-   * @return 远程依赖URL列表
-   */
-  public List<Library> resolveRemoteLibraries() {
-    return libs.stream().filter(Library::currentPlatform).collect(Collectors.toList());
-  }
 
   /**
    * 获取 libDir下的配置
@@ -134,7 +134,7 @@ public class Manifest {
    * @return 配置
    */
   public Path localManifest() {
-    return Path.of(configPath);
+    return Path.of(".", configPath).toAbsolutePath();
   }
 
   /**
@@ -164,6 +164,6 @@ public class Manifest {
    * @return true 有效
    */
   public boolean validate() {
-    return launcherClass != null && !launcherClass.isBlank();
+    return launchClass != null && !launchClass.isBlank();
   }
 }
