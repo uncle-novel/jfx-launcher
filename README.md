@@ -1,16 +1,16 @@
 # JFX-Launcher
 
-<a href="https://github.com/unclezs/fx-launcher/actions/workflows/gradle.yml">
-<img src="https://img.shields.io/github/workflow/status/unclezs/fx-launcher/Java%20CI%20with%20Gradle" alt="gradle build"/>
+<a href="https://github.com/unclezs/jfx-launcher/actions/workflows/gradle.yml">
+<img src="https://img.shields.io/github/workflow/status/unclezs/jfx-launcher/Java%20CI%20with%20Gradle" alt="gradle build"/>
 </a>
 <a href="https://openjdk.java.net/">
 <img src="https://img.shields.io/badge/version-1.0.8-blue" alt="版本"/>
 </a>
-<a href="https://github.com/unclezs/fx-launcher/blob/main/LICENSE">
-<img src="https://img.shields.io/github/license/unclezs/fx-launcher?color=%2340C0D0&label=License" alt="GitHub license"/>
+<a href="https://github.com/unclezs/jfx-launcher/blob/main/LICENSE">
+<img src="https://img.shields.io/github/license/unclezs/jfx-launcher?color=%2340C0D0&label=License" alt="GitHub license"/>
 </a>
-<a href="https://github.com/unclezs/fx-launcher/issues">
-<img src="https://img.shields.io/github/issues/unclezs/fx-launcher?color=orange&label=Issues" alt="GitHub issues"/>
+<a href="https://github.com/unclezs/jfx-launcher/issues">
+<img src="https://img.shields.io/github/issues/unclezs/jfx-launcher?color=orange&label=Issues" alt="GitHub issues"/>
 </a>
 <a href="https://openjdk.java.net/">
 <img src="https://img.shields.io/badge/OpenJDK-11-green" alt="JDK Version"/>
