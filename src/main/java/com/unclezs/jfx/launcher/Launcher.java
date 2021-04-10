@@ -220,7 +220,6 @@ public class Launcher extends Application {
           LOG.info(String.format("更新完成: %s", resource.getPath()));
         }
         ui.setProgress(++i / resources.size());
-        Thread.sleep(100);
       }
     } catch (Exception e) {
       LOG.warning(String.format("更新最新版本失败: %s", e.getMessage()));
