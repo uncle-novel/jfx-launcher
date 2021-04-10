@@ -4,7 +4,7 @@
 <img src="https://img.shields.io/github/workflow/status/unclezs/jfx-launcher/Java%20CI%20with%20Gradle" alt="gradle build"/>
 </a>
 <a href="https://openjdk.java.net/">
-<img src="https://img.shields.io/badge/version-1.0.8-blue" alt="版本"/>
+<img src="https://img.shields.io/badge/version-1.1.0-blue" alt="版本"/>
 </a>
 <a href="https://github.com/unclezs/jfx-launcher/blob/main/LICENSE">
 <img src="https://img.shields.io/github/license/unclezs/jfx-launcher?color=%2340C0D0&label=License" alt="GitHub license"/>
@@ -17,9 +17,28 @@
 </a>
 
 一个openJfx的自动更新器，采用模块化API加载模块。
-
+<p>
 <img src="https://gitee.com/unclezs/image-blog/raw/master/start.png" />
 <img src="https://gitee.com/unclezs/image-blog/raw/master/20210409094616.png"/>
+</p>
+
+## 引入依赖
+
+### maven
+
+```xml
+<dependency>
+  <groupId>com.unclezs</groupId>
+  <artifactId>jfx-launcher</artifactId>
+  <version>1.1.0</version>
+</dependency>
+```
+
+### gradle
+
+```groovy
+implementation "com.unclezs:jfx-launcher:1.1.0"
+```
 
 ## 原理
 
@@ -57,10 +76,10 @@
 - **moduleOptions**： 模块的一些打破规则的参数 ： add-exports、add-opens、add-reads
 - **resources**: 资源列表，升级时候可以自动更新的，可以指定JAR、NATIVE、NATIVE_SYS、FILE类型的，根据不同类型采取不同的加载策略
 
-
 ### 注意
 
 如果添加了打破模块的规则，并且源模块不属于当前加载的layer，需要添加VM参数允许反射
+
 ```
 --add-modules ALL-SYSTEM --add-opens=java.base/java.lang=com.unclezs.jfx.launcher
 ```
