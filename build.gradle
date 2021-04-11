@@ -57,9 +57,9 @@ test {
 }
 
 javafx {
-  version = "11"
+  version = "16"
   modules = ["javafx.base", "javafx.controls", "javafx.fxml"]
-  configuration = "compileOnly"
+//  configuration = "compileOnly"
 }
 
 jar {

@@ -10,11 +10,10 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import lombok.extern.java.Log;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
 import java.util.List;
-import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * 启动UI界面
@@ -22,10 +21,10 @@ import java.util.logging.Logger;
  * @author blog.unclezs.com
  * @since 2021/03/26 15:48
  */
+@Log
 public class LauncherView extends StackPane {
 
   public static final String DEFAULT_CLASS = "launcher-view";
-  private static final Logger LOG = LoggerHelper.get(LauncherView.class);
   /**
    * 设置是否为更新的伪类
    */
@@ -119,30 +118,24 @@ public class LauncherView extends StackPane {
    * @param closeHandler 关闭按钮点击回调
    */
   public void setError(Throwable e, Runnable closeHandler) {
-    try (ByteArrayOutputStream out = new ByteArrayOutputStream(); PrintWriter writer = new PrintWriter(out)) {
-      e.printStackTrace(writer);
-      writer.flush();
-      String msg = out.toString();
-      LOG.warning("程序启动异常：".concat(msg));
-      FxUtils.runFx(() -> {
-        setUpdating(true);
-        phase.setText("程序启动异常，请查看日志！");
-        Pane exit = new Pane();
-        // 处理退出按钮被点击
-        exit.setOnMouseClicked(event -> {
-          if (closeHandler == null) {
-            System.exit(-1);
-          }
-          closeHandler.run();
-        });
-        VBox box = new VBox(phase, exit);
-        exit.getStyleClass().add("exit-btn");
-        phase.getStyleClass().add("error");
-        box.getStyleClass().setAll("progress-box");
-        progressView.getChildren().setAll(box);
+    log.log(Level.SEVERE, "程序启动异常", e);
+    FxUtils.runFx(() -> {
+      setUpdating(true);
+      phase.setText("程序启动异常，请查看日志！");
+      Pane exit = new Pane();
+      // 处理退出按钮被点击
+      exit.setOnMouseClicked(event -> {
+        if (closeHandler == null) {
+          System.exit(-1);
+        }
+        closeHandler.run();
       });
-    } catch (Exception ignored) {
-    }
+      VBox box = new VBox(phase, exit);
+      exit.getStyleClass().add("exit-btn");
+      phase.getStyleClass().add("error");
+      box.getStyleClass().setAll("progress-box");
+      progressView.getChildren().setAll(box);
+    });
   }
 
   /**
@@ -151,7 +144,7 @@ public class LauncherView extends StackPane {
    * @param phase 当前
    */
   public void setPhase(String phase) {
-    LOG.info(phase);
+    log.info(phase);
     FxUtils.runAndWait(() -> this.phase.setText(phase));
   }
 

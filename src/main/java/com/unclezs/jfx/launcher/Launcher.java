@@ -7,21 +7,16 @@ import javafx.scene.Scene;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import lombok.extern.java.Log;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import java.io.IOException;
-import java.net.URI;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * 启动器
@@ -29,16 +24,15 @@ import java.util.logging.Logger;
  * @author blog.unclezs.com
  * @since 2021/02/27 19:46
  */
+@Log
 public class Launcher extends Application {
 
-  private static final Logger LOG = LoggerHelper.get(Launcher.class);
   private Stage launcherStage;
   private Manifest manifest;
   private LauncherView ui;
   private boolean newVersion = true;
 
   public static void main(String[] args) {
-    LOG.info("Start FX Launcher...");
     launch(args);
   }
 
@@ -75,7 +69,7 @@ public class Launcher extends Application {
         ui.setPhase("正在启动应用...");
         app.start(appStage);
         launcherStage.close();
-      } catch (Throwable e) {
+      } catch (Exception e) {
         handleStartError(e);
       }
     });
@@ -96,7 +90,7 @@ public class Launcher extends Application {
     new Thread(() -> {
       try {
         startApplication();
-      } catch (Throwable e) {
+      } catch (Exception e) {
         handleStartError(e);
       }
     }).start();
@@ -104,11 +98,8 @@ public class Launcher extends Application {
 
   /**
    * 检测更新
-   *
-   * @throws Exception 异常
    */
-  private void checkForUpgrade() throws Exception {
-    ignoreSslCertificate();
+  private void checkForUpgrade() {
     boolean hasNew = syncManifest();
     if (hasNew) {
       syncResources();
@@ -122,7 +113,7 @@ public class Launcher extends Application {
    */
   public boolean syncManifest() {
     try {
-      LOG.info(String.format("获取远程配置文件，%s", manifest.remoteManifest()));
+      log.log(Level.INFO, "获取远程配置文件:{0}", manifest.remoteManifest());
       ui.setPhase("正在检测是否有新版本...");
       Manifest remoteManifest = Manifest.load(manifest.remoteManifest());
       if (!checkNew(remoteManifest)) {
@@ -141,13 +132,13 @@ public class Launcher extends Application {
       manifest = remoteManifest;
       // 显示更新内容
       if (!manifest.getChangeLog().isEmpty()) {
-        LOG.info(String.format("更新内容：%s", manifest.getChangeLog()));
+        log.log(Level.INFO, "更新内容:{0}", manifest.getChangeLog());
         ui.setWhatNew(manifest.getChangeLog());
       }
       return true;
-    } catch (Throwable e) {
+    } catch (Exception e) {
       // 忽略更新失败
-      LoggerHelper.error(LOG, "更新失败", e);
+      log.log(Level.SEVERE, "更新失败", e);
     }
     return false;
   }
@@ -158,7 +149,7 @@ public class Launcher extends Application {
    * @throws Exception 加载失败
    */
   private void loadLocalManifest() throws Exception {
-    LOG.info("解析本地配置文件");
+    log.info("解析本地配置文件");
     manifest = Manifest.embedded();
     // 解析参数覆盖嵌入的
     parseParams();
@@ -205,8 +196,9 @@ public class Launcher extends Application {
     try {
       ui.setPhase("正在下载最新版本...");
       List<Resource> resources = manifest.resolveResources();
+      final long totalSize = resources.stream().filter(Resource::hasNew).mapToLong(Resource::getSize).sum();
       ui.setProgress(0);
-      double i = 0;
+      double current = 0;
       for (Resource resource : resources) {
         Path localPath = resource.toLocalPath();
         if (Files.notExists(localPath) || Files.size(localPath) != resource.getSize()) {
@@ -215,15 +207,21 @@ public class Launcher extends Application {
             Files.createDirectories(localPath.getParent());
           }
           // 下载更新
-          URL url = resource.toUrl(Path.of(URI.create(manifest.getUrl())));
-          Files.write(localPath, url.openStream().readAllBytes());
-          LOG.info(String.format("更新完成: %s", resource.getPath()));
+          URL url = resource.toUrl(manifest.getUrl());
+          try (InputStream in = url.openStream(); OutputStream out = Files.newOutputStream(localPath)) {
+            byte[] buffer = new byte[65536];
+            int read;
+            while ((read = in.read(buffer)) > -1) {
+              out.write(buffer, 0, read);
+              current += read;
+              ui.setProgress(current / totalSize);
+            }
+          }
+          log.log(Level.INFO, "更新完成: {0}", resource.getPath());
         }
-        ui.setProgress(++i / resources.size());
       }
     } catch (Exception e) {
-      LOG.warning(String.format("更新最新版本失败: %s", e.getMessage()));
-      throw new RuntimeException(e);
+      throw new LauncherException("更新最新版本失败", e);
     }
   }
 
@@ -245,38 +243,9 @@ public class Launcher extends Application {
         }
       }
       return false;
-    } catch (IOException e) {
-      LOG.warning(String.format("检测是否有新版本失败: %s", e.getMessage()));
-      throw new RuntimeException(e);
+    } catch (Exception e) {
+      throw new LauncherException("检测是否有新版本失败", e);
     }
-  }
-
-  /**
-   * 忽略 SSL 错误
-   *
-   * @throws Exception /
-   */
-  private void ignoreSslCertificate() throws Exception {
-    TrustManager[] trustManager = new TrustManager[]{
-      new X509TrustManager() {
-        @Override
-        public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {
-        }
-
-        @Override
-        public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {
-        }
-
-        @Override
-        public X509Certificate[] getAcceptedIssuers() {
-          return null;
-        }
-      }};
-    SSLContext sslContext = SSLContext.getInstance("SSL");
-    sslContext.init(null, trustManager, new java.security.SecureRandom());
-    HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
-    HostnameVerifier hostnameVerifier = (s, sslSession) -> true;
-    HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
   }
 
   /**

@@ -73,7 +73,7 @@ public class ModuleLoader {
   public Module findModule(String name) {
     Optional<Module> module = layer.findModule(name);
     if (module.isEmpty()) {
-      throw new RuntimeException(String.format("module not found! [layer=%s,module=%s]", layer, name));
+      throw new LauncherException(String.format("module not found! [layer=%s,module=%s]", layer, name));
     }
     return module.get();
   }
@@ -142,6 +142,7 @@ public class ModuleLoader {
         break;
       case "--add-opens":
         addOpens(source, sourceModule[1], targets);
+        break;
       case "--add-reads":
         addReads(source, targets);
         break;
@@ -171,8 +172,8 @@ public class ModuleLoader {
           constructor.setAccessible(true);
           moduleLayerController = constructor.newInstance(moduleLayer);
           controllers.put(moduleLayer, moduleLayerController);
-        } catch (Throwable error) {
-          throw new RuntimeException(error);
+        } catch (Exception error) {
+          throw new LauncherException("反射创建Layer的控制器失败", error);
         }
       }
       return moduleLayerController;

@@ -3,8 +3,12 @@ package com.unclezs.jfx.launcher;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
@@ -15,7 +19,7 @@ import java.nio.file.Path;
  */
 @Data
 @NoArgsConstructor
-public class Resource {
+public class Resource implements Serializable {
 
   /**
    * 文件相对于URL的路径
@@ -53,11 +57,11 @@ public class Resource {
     this.type = type;
   }
 
-  public URL toUrl(Path libDir) {
+  public URL toUrl(String baseUri) {
     try {
-      return libDir.resolve(path).toFile().toURI().toURL();
+      return URI.create(baseUri).resolve(path).toURL();
     } catch (MalformedURLException e) {
-      throw new RuntimeException(e);
+      throw new LauncherException("格式错误的URL", e);
     }
   }
 
@@ -67,13 +71,26 @@ public class Resource {
    * @return 路径
    */
   public Path toLocalPath() {
-    Path path = Path.of(this.path);
-    if (path.isAbsolute()) {
-      return path;
+    Path localPath = Path.of(this.path);
+    if (localPath.isAbsolute()) {
+      return localPath;
     }
     return Path.of(".", this.path).toAbsolutePath();
   }
 
+  /**
+   * 是否更新了
+   *
+   * @return true 有更新
+   */
+  public boolean hasNew() {
+    Path localPath = toLocalPath();
+    try {
+      return Files.notExists(localPath) || Files.size(localPath) != size;
+    } catch (IOException e) {
+      throw new LauncherException("检测资源是否更新失败: ".concat(localPath.toString()), e);
+    }
+  }
 
   public boolean currentPlatform() {
     return platform == null || platform == Platform.CURRENT;

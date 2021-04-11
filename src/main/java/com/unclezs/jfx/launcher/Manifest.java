@@ -9,7 +9,9 @@ import lombok.NonNull;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -24,7 +26,7 @@ import java.util.stream.Collectors;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Manifest {
+public class Manifest implements Serializable {
 
   public static final Gson GSON = new Gson();
 
@@ -83,12 +85,13 @@ public class Manifest {
    *
    * @param uri 配置文件URI
    * @return 配置
-   * @throws Exception 加载失败
    */
   @NonNull
-  public static Manifest load(URI uri) throws Exception {
+  public static Manifest load(URI uri) {
     try (InputStream stream = uri.toURL().openStream()) {
       return GSON.fromJson(new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8)), Manifest.class);
+    } catch (Exception e) {
+      throw new LauncherException("Manifest加载失败: ".concat(uri.toString()), e);
     }
   }
 
@@ -96,14 +99,17 @@ public class Manifest {
    * 获取嵌入的 manifest
    *
    * @return manifest
-   * @throws Exception /
    */
-  public static Manifest embedded() throws Exception {
+  public static Manifest embedded() {
     URL resource = Launcher.class.getResource(BACKSLASH.concat(Manifest.EMBEDDED_CONFIG));
     if (resource == null) {
       return new Manifest();
     }
-    return load(resource.toURI());
+    try {
+      return load(resource.toURI());
+    } catch (URISyntaxException e) {
+      throw new LauncherException("URI语法错误", e);
+    }
   }
 
   /**

@@ -2,8 +2,10 @@ package com.unclezs.jfx.launcher;
 
 import javafx.application.Platform;
 import lombok.experimental.UtilityClass;
+import lombok.extern.java.Log;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Level;
 
 /**
  * Fx工具
@@ -11,6 +13,7 @@ import java.util.concurrent.CountDownLatch;
  * @author blog.unclezs.com
  * @date 2021/03/26 23:22
  */
+@Log
 @UtilityClass
 public class FxUtils {
 
@@ -33,8 +36,9 @@ public class FxUtils {
     });
     try {
       doneLatch.await();
-    } catch (InterruptedException ex) {
-      throw new RuntimeException(ex);
+    } catch (InterruptedException e) {
+      log.log(Level.WARNING, "runAndWait被中断", e);
+      Thread.currentThread().interrupt();
     }
   }
 }
