@@ -4,7 +4,7 @@
 <img src="https://img.shields.io/github/workflow/status/unclezs/jfx-launcher/Java%20CI%20with%20Gradle" alt="gradle build"/>
 </a>
 <a href="https://openjdk.java.net/">
-<img src="https://img.shields.io/badge/version-1.1.2-blue" alt="版本"/>
+<img src="https://img.shields.io/badge/version-1.1.3-blue" alt="版本"/>
 </a>
 <a href="https://github.com/unclezs/jfx-launcher/blob/main/LICENSE">
 <img src="https://img.shields.io/github/license/unclezs/jfx-launcher?color=%2340C0D0&label=License" alt="GitHub license"/>
@@ -30,14 +30,14 @@
 <dependency>
   <groupId>com.unclezs</groupId>
   <artifactId>jfx-launcher</artifactId>
-  <version>1.1.2</version>
+  <version>1.1.3</version>
 </dependency>
 ```
 
 ### gradle
 
 ```groovy
-implementation "com.unclezs:jfx-launcher:1.1.2"
+implementation "com.unclezs:jfx-launcher:1.1.3"
 ```
 
 ## 原理

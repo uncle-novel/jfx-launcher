@@ -145,10 +145,8 @@ public class Launcher extends Application {
 
   /**
    * 加载本地 Manifest
-   *
-   * @throws Exception 加载失败
    */
-  private void loadLocalManifest() throws Exception {
+  private void loadLocalManifest() {
     log.info("解析本地配置文件");
     manifest = Manifest.embedded();
     // 解析参数覆盖嵌入的
@@ -200,8 +198,8 @@ public class Launcher extends Application {
       ui.setProgress(0);
       double current = 0;
       for (Resource resource : resources) {
-        Path localPath = resource.toLocalPath();
-        if (Files.notExists(localPath) || Files.size(localPath) != resource.getSize()) {
+        if (resource.hasNew()) {
+          Path localPath = resource.toLocalPath();
           // 创建父目录
           if (!Files.exists(localPath.getParent())) {
             Files.createDirectories(localPath.getParent());
@@ -236,13 +234,7 @@ public class Launcher extends Application {
       if (!manifest.equals(remote)) {
         return true;
       }
-      for (Resource resource : remote.resolveResources()) {
-        Path localPath = resource.toLocalPath();
-        if (Files.notExists(localPath) || Files.size(localPath) != resource.getSize()) {
-          return true;
-        }
-      }
-      return false;
+      return remote.resolveResources().stream().anyMatch(Resource::hasNew);
     } catch (Exception e) {
       throw new LauncherException("检测是否有新版本失败", e);
     }

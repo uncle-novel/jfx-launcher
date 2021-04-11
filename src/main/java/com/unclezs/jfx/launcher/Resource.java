@@ -3,7 +3,6 @@ package com.unclezs.jfx.launcher;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -85,11 +84,7 @@ public class Resource implements Serializable {
    */
   public boolean hasNew() {
     Path localPath = toLocalPath();
-    try {
-      return Files.notExists(localPath) || Files.size(localPath) != size;
-    } catch (IOException e) {
-      throw new LauncherException("检测资源是否更新失败: ".concat(localPath.toString()), e);
-    }
+    return Files.notExists(localPath) || localPath.toFile().length() != size;
   }
 
   public boolean currentPlatform() {
