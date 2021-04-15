@@ -3,7 +3,7 @@ buildscript {
     mavenLocal()
   }
   dependencies {
-    classpath 'com.unclezs:sass-gradle-plugin:1.0.7'
+    classpath 'com.unclezs:sass-gradle-plugin:1.0.10'
   }
 }
 plugins {

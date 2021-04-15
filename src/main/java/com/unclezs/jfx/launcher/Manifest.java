@@ -76,11 +76,6 @@ public class Manifest implements Serializable {
    */
   protected List<String> moduleOptions = new ArrayList<>();
   /**
-   * 是否为新版本
-   */
-  private transient boolean newVersion = true;
-
-  /**
    * 加载配置
    *
    * @param uri 配置文件URI
