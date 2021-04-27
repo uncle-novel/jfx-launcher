@@ -59,8 +59,8 @@ public class ModuleLoader {
     ModuleFinder finder = ModuleFinder.of(this.modulePath);
     ModuleLayer currentLayer = ModuleLoader.class.getModule().getLayer();
     Configuration configuration = currentLayer.configuration();
-    Configuration appConfiguration = configuration.resolve(finder, ModuleFinder.of(), Set.of(this.rootModule));
-    this.controller = ModuleLayer.defineModulesWithOneLoader(appConfiguration, List.of(currentLayer), ModuleLoader.class.getClassLoader());
+    Configuration appConfiguration = configuration.resolve(finder, ModuleFinder.ofSystem(), Set.of(this.rootModule));
+    this.controller = ModuleLayer.defineModulesWithOneLoader(appConfiguration, List.of(currentLayer), ModuleLoader.class.getModule().getClassLoader());
     this.layer = this.controller.layer();
   }
 

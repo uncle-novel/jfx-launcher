@@ -41,7 +41,7 @@ public class Launcher extends Application {
   }
 
   @Override
-  public void init() throws Exception {
+  public void init() {
     Thread.currentThread().setName("Launcher");
     loadLocalManifest();
     ui = new LauncherView(manifest);
