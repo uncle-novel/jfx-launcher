@@ -31,6 +31,7 @@ public class Launcher extends Application {
    */
   public static final String CHANGE_LOG_ARG_NAME = "changeLog";
   public static final String VERSION_ARG_NAME = "version";
+  public static final String HAS_NEW = "hasNew";
   private Stage launcherStage;
   private Manifest manifest;
   private LauncherView ui;
@@ -68,9 +69,7 @@ public class Launcher extends Application {
         Application app = (Application) appClass.getConstructor().newInstance();
         app.init();
         Stage appStage = new Stage();
-        if (newVersion) {
-          appStage.setUserData(Map.of(CHANGE_LOG_ARG_NAME, manifest.getChangeLog(), VERSION_ARG_NAME, manifest.getVersion()));
-        }
+        appStage.setUserData(Map.of(CHANGE_LOG_ARG_NAME, manifest.getChangeLog(), VERSION_ARG_NAME, manifest.getVersion(), HAS_NEW, newVersion));
         ui.setPhase("正在启动应用...");
         app.start(appStage);
         launcherStage.close();
@@ -169,19 +168,19 @@ public class Launcher extends Application {
     List<Resource> resources = manifest.resolveResources();
     // 本地库
     resources.stream()
-            .filter(resource -> Resource.Type.NATIVE == resource.getType())
-            .map(resource -> Path.of(".", resource.getPath()).toFile().getAbsolutePath())
-            .forEach(System::load);
+      .filter(resource -> Resource.Type.NATIVE == resource.getType())
+      .map(resource -> Path.of(".", resource.getPath()).toFile().getAbsolutePath())
+      .forEach(System::load);
     // 系统库
     resources.stream()
-            .filter(resource -> Resource.Type.NATIVE_SYS == resource.getType())
-            .map(Resource::getPath)
-            .forEach(System::loadLibrary);
+      .filter(resource -> Resource.Type.NATIVE_SYS == resource.getType())
+      .map(Resource::getPath)
+      .forEach(System::loadLibrary);
     // 加载依赖模块
     Path[] modules = resources.stream()
-            .filter(resource -> Resource.Type.JAR == resource.getType())
-            .map(Resource::toLocalPath)
-            .toArray(Path[]::new);
+      .filter(resource -> Resource.Type.JAR == resource.getType())
+      .map(Resource::toLocalPath)
+      .toArray(Path[]::new);
     ModuleLoader moduleLoader = new ModuleLoader(modules, manifest.getLaunchModule());
     manifest.getModuleOptions().forEach(moduleLoader::add);
     ClassLoader classLoader = moduleLoader.getClassLoader();
