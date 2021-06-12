@@ -73,6 +73,7 @@ public class Launcher extends Application {
         ui.setPhase("正在启动应用...");
         app.start(appStage);
         launcherStage.close();
+        launcherStage = null;
       } catch (Exception e) {
         handleStartError(e);
       }
@@ -91,13 +92,15 @@ public class Launcher extends Application {
       return;
     }
     //noinspection AlibabaAvoidManuallyCreateThread
-    new Thread(() -> {
+    Thread startThread = new Thread(() -> {
       try {
         startApplication();
       } catch (Exception e) {
         handleStartError(e);
       }
-    }).start();
+    });
+    startThread.setDaemon(true);
+    startThread.start();
   }
 
   /**
@@ -269,8 +272,9 @@ public class Launcher extends Application {
   private void handleStartError(Throwable e) {
     ui.setPhase("程序启动异常！！！");
     ui.setError(e, () -> {
-      launcherStage.setOnCloseRequest(event -> Platform.exit());
       launcherStage.close();
+      Platform.exit();
+      System.exit(-1);
     });
   }
 
