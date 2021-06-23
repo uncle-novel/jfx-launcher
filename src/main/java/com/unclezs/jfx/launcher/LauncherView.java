@@ -13,6 +13,7 @@ import javafx.scene.layout.VBox;
 import lombok.extern.java.Log;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
 
 /**
@@ -40,7 +41,7 @@ public class LauncherView extends StackPane {
   public LauncherView(Manifest manifest) {
     this.manifest = manifest;
     getStyleClass().setAll(DEFAULT_CLASS);
-    getStylesheets().setAll(LauncherView.class.getResource("/com/unclezs/jfx/launcher/css/view.css").toExternalForm());
+    getStylesheets().setAll(Objects.requireNonNull(LauncherView.class.getResource("/com/unclezs/jfx/launcher/css/view.css")).toExternalForm());
 
     VBox container = new VBox();
     VBox.setVgrow(messageView, Priority.ALWAYS);
