@@ -71,8 +71,8 @@ implementation "com.unclezs:jfx-launcher:1.1.9"
 - **appName**： 应用名称
 - **version**： 版本号
 - **changeLog**： 更新日志
-- **launchModule**： 启动类
-- **launchClass**： 启动类所属模块
+- **launchModule**： 启动类所属模块
+- **launchClass**： 启动类
 - **moduleOptions**： 模块的一些打破规则的参数 ： add-exports、add-opens、add-reads
 - **resources**: 资源列表，升级时候可以自动更新的，可以指定JAR、NATIVE、NATIVE_SYS、FILE类型的，根据不同类型采取不同的加载策略
 
