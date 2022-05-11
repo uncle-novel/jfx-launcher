@@ -30,13 +30,24 @@ public class Launcher extends Application {
    * 传递给app的信息，如果有新版本
    */
   public static final String CHANGE_LOG_ARG_NAME = "changeLog";
+  /**
+   * 版本参数名称
+   */
   public static final String VERSION_ARG_NAME = "version";
+  /**
+   * 有新版本
+   */
   public static final String HAS_NEW = "hasNew";
   private Stage launcherStage;
   private Manifest manifest;
   private LauncherView ui;
   private boolean newVersion = true;
 
+  /**
+   * 入口
+   *
+   * @param args 参数
+   */
   public static void main(String[] args) {
     launch(args);
   }

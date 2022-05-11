@@ -45,6 +45,12 @@ public class ModuleLoader {
    */
   private ModuleLayer.Controller controller;
 
+  /**
+   * 模块加载器
+   *
+   * @param modulePath 模块路径
+   * @param rootModule 根模块
+   */
   public ModuleLoader(Path[] modulePath, String rootModule) {
     this.modulePath = modulePath;
     this.rootModule = rootModule;

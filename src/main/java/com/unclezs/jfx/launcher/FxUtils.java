@@ -17,6 +17,11 @@ import java.util.logging.Level;
 @UtilityClass
 public class FxUtils {
 
+  /**
+   * 运行在 FX
+   *
+   * @param runnable 可运行的
+   */
   public static void runFx(Runnable runnable) {
     if (Platform.isFxApplicationThread()) {
       runnable.run();
@@ -25,6 +30,11 @@ public class FxUtils {
     }
   }
 
+  /**
+   * 运行和等待
+   *
+   * @param r r
+   */
   public static void runAndWait(final Runnable r) {
     final CountDownLatch doneLatch = new CountDownLatch(1);
     runFx(() -> {

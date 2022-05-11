@@ -37,12 +37,27 @@ public class Resource implements Serializable {
    */
   private Type type;
 
+  /**
+   * 资源
+   *
+   * @param path     路径
+   * @param size     大小
+   * @param platform 平台
+   */
   public Resource(String path, Long size, Platform platform) {
     this.path = path;
     this.size = size;
     this.platform = platform;
   }
 
+  /**
+   * 资源
+   *
+   * @param path     路径
+   * @param size     大小
+   * @param platform 平台
+   * @param type     类型
+   */
   public Resource(String path, Long size, Platform platform, Type type) {
     this.path = path;
     this.size = size;
@@ -50,12 +65,25 @@ public class Resource implements Serializable {
     this.type = type;
   }
 
+  /**
+   * 资源
+   *
+   * @param path 路径
+   * @param size 大小
+   * @param type 类型
+   */
   public Resource(String path, Long size, Type type) {
     this.path = path;
     this.size = size;
     this.type = type;
   }
 
+  /**
+   * url
+   *
+   * @param baseUri 基础uri
+   * @return {@link URL}
+   */
   public URL toUrl(String baseUri) {
     try {
       return URI.create(baseUri).resolve(path).toURL();
@@ -87,10 +115,21 @@ public class Resource implements Serializable {
     return Files.notExists(localPath) || localPath.toFile().length() != size;
   }
 
+  /**
+   * 当前平台
+   *
+   * @return boolean
+   */
   public boolean currentPlatform() {
     return platform == null || platform == Platform.CURRENT;
   }
 
+  /**
+   * 类型
+   *
+   * @author unclezs
+   * @date 2022/05/11
+   */
   public enum Type {
     /**
      * Jar包，classloader加载

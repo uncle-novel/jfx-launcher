@@ -28,12 +28,18 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class Manifest implements Serializable {
 
+  /**
+   * gson
+   */
   public static final Gson GSON = new Gson();
 
   /**
    * 嵌入Jar的配置文件名
    */
   public static final String EMBEDDED_CONFIG = "app.json";
+  /**
+   * 反斜杠
+   */
   public static final String BACKSLASH = "/";
   /**
    * 配置文件位置
