@@ -27,16 +27,24 @@ allprojects {
 
 def compileScss = {
     def scssDir = file("${sourceSets.main.resources.srcDirs[0]}/css")
-    fileTree(scssDir).each { file ->
+    for (final def file in fileTree(scssDir)) {
         if (file.isDirectory()) {
-            return
+            continue
         }
         if (file.name.endsWith("scss") && !file.name.startsWith("_")) {
-            println "compile scss to css: $file.name"
-            exec {
-                executable("sass")
-                args("--no-source-map", "--no-charset", file.absolutePath, file.absolutePath.replace("scss", "css"))
+            try {
+                exec(new Action<ExecSpec>() {
+                    @Override
+                    void execute(ExecSpec es) {
+                        es.executable("sass")
+                        es.args("--no-source-map", "--no-charset", file.absolutePath, file.absolutePath.replace("scss", "css"))
+                    }
+                })
+            } catch (ignored) {
+                println "编译 scss 失败，请确认是否已经安装了 sass"
+                return
             }
+            println "compile scss to css: $file.name"
         } else if (file.name.endsWith(".map")) {
             file.delete()
         }
