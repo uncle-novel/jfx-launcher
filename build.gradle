@@ -1,25 +1,16 @@
-buildscript {
-    repositories {
-        mavenLocal()
-    }
-    dependencies {
-        classpath 'com.unclezs:sass-gradle-plugin:1.0.10'
-    }
-}
 plugins {
     id 'java'
-    id "org.openjfx.javafxplugin" version "0.0.9"
+    id "org.openjfx.javafxplugin" version "0.0.11"
     id "io.codearte.nexus-staging" version "0.30.0" apply false
-}
-apply plugin: "com.unclezs.gradle.sass"
-
-sass {
-    cssPath = "com/unclezs/jfx/launcher/css"
-    sassPath = "scss"
 }
 
 sourceSets {
-    main.output.resourcesDir = main.java.outputDir
+    main {
+        output.resourcesDir = java.classesDirectory
+        resources {
+            exclude '**/*.scss'
+        }
+    }
 }
 
 allprojects {
@@ -34,7 +25,36 @@ allprojects {
     }
 }
 
+def compileScss = {
+    def scssDir = file("${sourceSets.main.resources.srcDirs[0]}/css")
+    for (final def file in fileTree(scssDir)) {
+        if (file.isDirectory()) {
+            continue
+        }
+        if (file.name.endsWith("scss") && !file.name.startsWith("_")) {
+            try {
+                exec(new Action<ExecSpec>() {
+                    @Override
+                    void execute(ExecSpec es) {
+                        es.executable("sass")
+                        es.args("--no-source-map", "--no-charset", file.absolutePath, file.absolutePath.replace("scss", "css"))
+                    }
+                })
+            } catch (ignored) {
+                println "编译 scss 失败，请确认是否已经安装了 sass"
+                return
+            }
+            println "compile scss to css: $file.name"
+        } else if (file.name.endsWith(".map")) {
+            file.delete()
+        }
+    }
+}
+
 tasks.withType(JavaCompile) {
+    doFirst {
+        compileScss()
+    }
     options.encoding = "UTF-8"
     options.fork = true
     sourceCompatibility = JavaVersion.VERSION_11
@@ -43,11 +63,11 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-    annotationProcessor "org.projectlombok:lombok:1.18.18"
-    compileOnly "org.projectlombok:lombok:1.18.18"
-    implementation "com.google.code.gson:gson:2.8.6"
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    implementation 'com.google.code.gson:gson:2.9.0'
     // test
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.0"
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
 }
 
@@ -57,7 +77,7 @@ test {
 }
 
 javafx {
-    version = "16"
+    version = "17.0.2"
     modules = ["javafx.base", "javafx.controls", "javafx.fxml"]
     configuration = "compileOnly"
 }

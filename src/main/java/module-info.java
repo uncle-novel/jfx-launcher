@@ -8,6 +8,8 @@ module com.unclezs.jfx.launcher {
   requires javafx.fxml;
   requires javafx.controls;
   requires javafx.graphics;
+  requires java.logging;
 
+  opens com.unclezs.jfx.launcher to com.google.gson;
   exports com.unclezs.jfx.launcher;
 }

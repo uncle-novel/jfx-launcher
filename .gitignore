@@ -10,6 +10,5 @@ build/
 out/
 test-res/
 .idea
-css/
 conf
 runtime

@@ -25,6 +25,9 @@ import java.util.logging.Level;
 @Log
 public class LauncherView extends StackPane {
 
+  /**
+   * class
+   */
   public static final String DEFAULT_CLASS = "launcher-view";
   /**
    * 设置是否为更新的伪类
@@ -35,13 +38,24 @@ public class LauncherView extends StackPane {
   private final StackPane progressView = new StackPane();
   private final Manifest manifest;
   private ProgressBar progressBar;
+  /**
+   * 更新内容
+   */
   private Label whatNew;
+  /**
+   * 更新
+   */
   private ReadOnlyBooleanWrapper updating;
 
+  /**
+   * 启动器
+   *
+   * @param manifest 清单
+   */
   public LauncherView(Manifest manifest) {
     this.manifest = manifest;
     getStyleClass().setAll(DEFAULT_CLASS);
-    getStylesheets().setAll(Objects.requireNonNull(LauncherView.class.getResource("/com/unclezs/jfx/launcher/css/view.css")).toExternalForm());
+    getStylesheets().setAll(Objects.requireNonNull(LauncherView.class.getResource("/css/view.css")).toExternalForm());
 
     VBox container = new VBox();
     VBox.setVgrow(messageView, Priority.ALWAYS);
@@ -149,18 +163,38 @@ public class LauncherView extends StackPane {
     FxUtils.runAndWait(() -> this.phase.setText(phase));
   }
 
+  /**
+   * 是否在更新
+   *
+   * @return boolean
+   */
   public boolean getUpdating() {
     return updatingProperty().get();
   }
 
+  /**
+   * 设置更新
+   *
+   * @param updating 更新
+   */
   public void setUpdating(boolean updating) {
     updatingPropertyImpl().set(updating);
   }
 
+  /**
+   * 更新属性
+   *
+   * @return {@link ReadOnlyBooleanProperty}
+   */
   public ReadOnlyBooleanProperty updatingProperty() {
     return updatingPropertyImpl().getReadOnlyProperty();
   }
 
+  /**
+   * 更新属性impl
+   *
+   * @return {@link ReadOnlyBooleanWrapper}
+   */
   public ReadOnlyBooleanWrapper updatingPropertyImpl() {
     if (updating == null) {
       updating = new ReadOnlyBooleanWrapper(this, "updating", false) {

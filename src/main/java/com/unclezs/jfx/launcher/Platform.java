@@ -28,9 +28,21 @@ public enum Platform {
    */
   public static final Platform CURRENT;
 
+  /**
+   * mac str
+   */
   public static final String MAC_STR = "mac";
+  /**
+   * mac
+   */
   public static final String DARWIN = "darwin";
+  /**
+   * linux
+   */
   public static final String NUX = "nux";
+  /**
+   * windows
+   */
   public static final String WIN_STR = "win";
 
   static {
